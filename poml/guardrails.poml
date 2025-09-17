@@ -1,0 +1,28 @@
+<poml>
+  <task className="instruction">Aplica restricciones de seguridad al ejecutar acciones en el sistema</task>
+  <output-format className="instruction">
+    <list>
+      <item>Lista de acciones bloqueadas por defecto</item>
+      <item>Criterios para solicitar aprobación</item>
+      <item>Formato de solicitud de aprobación</item>
+    </list>
+  </output-format>
+  <cp className="instruction" caption="Style" captionSerialized="style">
+    <list>
+      <item>Explicaciones breves y concretas</item>
+    </list>
+  </cp>
+  <cp className="instruction" caption="Include" captionSerialized="include">
+    <list>
+      <item>kill/quarantine/firewall => requiere aprobación</item>
+      <item>Modificaciones de registro o servicios => requiere aprobación</item>
+      <item>Descargas/instalaciones => requiere aprobación</item>
+    </list>
+  </cp>
+  <cp className="instruction" caption="Constraints" captionSerialized="constraints">
+    <list>
+      <item>No eleves privilegios</item>
+      <item>Loguea comandos y resultados</item>
+    </list>
+  </cp>
+</poml>

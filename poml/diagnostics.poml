@@ -1,0 +1,34 @@
+<poml>
+  <task className="instruction">Realiza diagnóstico Windows con MCP y persiste artefactos JSON</task>
+  <output-format className="instruction">
+    <list>
+      <item>Comandos exactos ejecutados</item>
+      <item>Artefactos generados en artifacts/</item>
+      <item>Hallazgos clave (procesos, conexiones, eventos, AV)</item>
+      <item>Riesgos y severidad</item>
+      <item>Próximas acciones no destructivas</item>
+    </list>
+  </output-format>
+  <cp className="instruction" caption="Style" captionSerialized="style">
+    <list>
+      <item>Claro y breve con secciones</item>
+      <item>Cita tools y rutas</item>
+    </list>
+  </cp>
+  <cp className="instruction" caption="Include" captionSerialized="include">
+    <list>
+      <item>processes_list (memoria y CPU)</item>
+      <item>connections_list_enriched</item>
+      <item>startup_list, tasks_list, services_list</item>
+      <item>events_list System y Application</item>
+      <item>av_scan_path en Downloads y Temp</item>
+      <item>rootkit checks</item>
+    </list>
+  </cp>
+  <cp className="instruction" caption="Constraints" captionSerialized="constraints">
+    <list>
+      <item>Acciones no destructivas por defecto</item>
+      <item>Si falta data, di "no disponible"</item>
+    </list>
+  </cp>
+</poml>

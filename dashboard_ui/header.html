@@ -1,0 +1,41 @@
+<header class="px-6 py-4 bg-white dark:bg-gray-800 shadow">
+  <div class="flex items-center justify-between">
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-blue-600">shield_person</span>
+        <span class="flex items-center gap-2">
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+            <defs>
+              <linearGradient id="ow-logo" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="var(--ow-accent-a, #22d3ee)"/>
+                <stop offset="100%" stop-color="var(--ow-accent-b, #a855f7)"/>
+              </linearGradient>
+            </defs>
+            <path d="M12 2l7 4v12l-7 4-7-4V6z" fill="none" stroke="url(#ow-logo)" stroke-width="1.6"/>
+            <path d="M7.5 12a4.5 4.5 0 0 1 9 0v0a4.5 4.5 0 0 1-9 0z" fill="url(#ow-logo)" opacity="0.25"/>
+          </svg>
+          <h1 class="text-xl font-semibold">Overwatch MCP</h1>
+        </span>
+        <span class="text-xs px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-200">beta</span>
+      </div>
+      <p class="text-xs text-gray-500 dark:text-gray-400">Agente MCP — tabs unificadas</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="hidden sm:flex flex-wrap gap-2 mr-2 text-xs">
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-gray-100 dark:bg-gray-700"><span class="material-symbols-outlined text-sm">monitor_heart</span> CPU: <span id="hdrCpu">--</span>%</span>
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-gray-100 dark:bg-gray-700"><span class="material-symbols-outlined text-sm">memory</span> RAM: <span id="hdrRam">--</span>%</span>
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-gray-100 dark:bg-gray-700"><span class="material-symbols-outlined text-sm">storage</span> Disco: <span id="hdrDisk">--</span>%</span>
+        <span id="diagStatusBadgeHdr" class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Idle</span>
+      </div>
+      <button id="btnDiag" class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700"><span class="material-symbols-outlined">play_arrow</span> Diagnóstico</button>
+      <button id="btnPrepare" class="inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-600 text-white rounded hover:bg-indigo-700"><span class="material-symbols-outlined">description</span> Reporte</button>
+      <a href="/static/" target="_blank" title="Recursos estáticos" class="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white rounded hover:bg-gray-700"><span class="material-symbols-outlined">folder</span> Estáticos</a>
+    </div>
+  </div>
+</header>
+<nav class="px-6 pt-2">
+  <ul class="flex gap-2 text-sm" id="owTabs">
+    <li><a data-tab="dashboard" href="/" class="px-3 py-1.5 rounded">Dashboard</a></li>
+    <li><a data-tab="gamebooster" href="/gamebooster" class="px-3 py-1.5 rounded">Game Booster</a></li>
+  </ul>
+</nav>

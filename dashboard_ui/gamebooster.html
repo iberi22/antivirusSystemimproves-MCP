@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overwatch MCP — GameBooster</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' ry='8' fill='%231f2937'/%3E%3Cpath d='M14 32h36' stroke='%23ffffff' stroke-width='6'/%3E%3Cpath d='M14 22h20' stroke='%233b82f6' stroke-width='6'/%3E%3Cpath d='M14 42h28' stroke='%238b5cf6' stroke-width='6'/%3E%3C/svg%3E" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'media' };
+  </script>
+  <!-- anime.js for loader animation -->
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji','Segoe UI Emoji', 'Segoe UI Symbol', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'wght' 400, 'opsz' 24 }
+    :root {
+      --ow-a: #22d3ee;
+      --ow-b: #a855f7;
+    }
+    .ow-panel { position: relative; border: 1px solid rgba(34,211,238,.25); box-shadow: 0 0 0 1px rgba(168,85,247,.12), 0 0 22px rgba(34,211,238,.08); background-image: radial-gradient(1200px 600px at 10% -20%, rgba(34,211,238,.06), rgba(0,0,0,0)); }
+    .mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    /* Loader overlay */
+    #owLoader { position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center; background: rgba(17,24,39,.88); backdrop-filter: blur(2px); }
+    #owLoader.hidden { display: none; }
+    .ow-loader-dot { width: 10px; height: 10px; border-radius: 9999px; background: #22d3ee; opacity: .9 }
+    .ow-loader-dot.b { background: #a855f7 }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+  <!-- Global loading overlay -->
+  <div id="owLoader">
+    <div class="flex flex-col items-center gap-4 text-gray-200">
+      <div class="flex gap-2">
+        <div class="ow-loader-dot a"></div>
+        <div class="ow-loader-dot b"></div>
+        <div class="ow-loader-dot a"></div>
+        <div class="ow-loader-dot b"></div>
+      </div>
+      <div class="text-sm">Cargando interfaz…</div>
+    </div>
+  </div>
+  <div id="owHeader"></div>
+
+  <main class="p-6 space-y-4">
+    <div id="status" class="hidden px-4 py-2 rounded border text-sm"></div>
+
+    <section class="ow-panel rounded p-4">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="lg:col-span-2 space-y-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <label class="text-sm">Perfil:</label>
+            <select id="gbProfile" class="text-sm border rounded px-2 py-1 bg-white dark:bg-gray-800"></select>
+            <label class="text-sm">Política:</label>
+            <select id="gbPolicy" class="text-sm border rounded px-2 py-1 bg-white dark:bg-gray-800">
+              <option value="Strict" selected>Strict</option>
+              <option value="Balanced">Balanced</option>
+              <option value="Aggressive">Aggressive</option>
+            </select>
+            <label class="text-xs inline-flex items-center gap-1 select-none">
+              <input id="gbAuto" type="checkbox" class="rounded border-gray-300" /> Auto
+            </label>
+            <button id="gbPreview" class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded">Previsualizar</button>
+            <button id="gbLoad" class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded">Cargar sugerencias</button>
+            <button id="gbClear" class="px-3 py-1.5 text-sm bg-gray-200 dark:bg-gray-700 rounded">Limpiar</button>
+          </div>
+          <div id="gbPreviewBox" class="hidden text-xs border rounded p-2 bg-gray-50 dark:bg-gray-900/40 mono"></div>
+
+          <div class="overflow-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-gray-100 dark:bg-gray-700">
+                <tr>
+                  <th class="px-2 py-1 text-left">PID</th>
+                  <th class="px-2 py-1 text-left">Nombre</th>
+                  <th class="px-2 py-1 text-right">RSS</th>
+                  <th class="px-2 py-1 text-right">CPU %</th>
+                  <th class="px-2 py-1 text-left">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tblGB"></tbody>
+            </table>
+          </div>
+        </div>
+        <aside class="space-y-3">
+          <div class="bg-gray-100 dark:bg-gray-800/60 rounded p-3">
+            <div class="text-sm font-medium mb-1">Ayuda</div>
+            <ul class="text-xs space-y-1 list-disc ml-5">
+              <li>Siempre confirma antes de actuar.</li>
+              <li>Usa aislamiento si dudas del impacto.</li>
+              <li>Evita cerrar procesos del sistema.</li>
+            </ul>
+          </div>
+          <div class="bg-gray-100 dark:bg-gray-800/60 rounded p-3">
+            <div class="text-sm font-medium mb-1">Actividad</div>
+            <pre id="gbLog" class="mono text-xs whitespace-pre-wrap max-h-64 overflow-auto"></pre>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal de confirmación -->
+  <div id="gbConfirmModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/40"></div>
+    <div class="relative mx-auto mt-24 max-w-md bg-white dark:bg-gray-800 rounded shadow p-4">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="material-symbols-outlined text-amber-600">warning</span>
+        <h3 class="font-medium">Confirmar acción</h3>
+      </div>
+      <p id="gbConfirmMsg" class="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap"></p>
+      <div class="mt-3 flex justify-end gap-2">
+        <button id="gbConfirmCancel" class="px-3 py-1.5 rounded bg-gray-200 dark:bg-gray-700">Cancelar</button>
+        <button id="gbConfirmOk" class="px-3 py-1.5 rounded bg-red-600 text-white">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/header.js"></script>
+  <script src="/static/gamebooster.js"></script>
+</body>
+</html>

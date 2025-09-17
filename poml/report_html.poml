@@ -1,0 +1,33 @@
+<poml>
+  <task className="instruction">Construye reporte HTML/CSS/JS con los artefactos JSON generados</task>
+  <output-format className="instruction">
+    <list>
+      <item>Resumen ejecutivo</item>
+      <item>Rendimiento del sistema</item>
+      <item>Procesos (Top memoria/CPU)</item>
+      <item>Conexiones y reputación</item>
+      <item>Autoruns, Servicios, Tareas</item>
+      <item>Eventos recientes</item>
+      <item>AV scans</item>
+      <item>Recomendaciones</item>
+    </list>
+  </output-format>
+  <cp className="instruction" caption="Style" captionSerialized="style">
+    <list>
+      <item>Visual limpio, responsive, accesible</item>
+      <item>Tablas o listas plegables para grandes volúmenes</item>
+    </list>
+  </cp>
+  <cp className="instruction" caption="Include" captionSerialized="include">
+    <list>
+      <item>web/report/index.html, styles.css, report.js</item>
+      <item>artifacts/*.json</item>
+    </list>
+  </cp>
+  <cp className="instruction" caption="Constraints" captionSerialized="constraints">
+    <list>
+      <item>Sin llamadas de red externas</item>
+      <item>Servir por HTTP local (no file://)</item>
+    </list>
+  </cp>
+</poml>

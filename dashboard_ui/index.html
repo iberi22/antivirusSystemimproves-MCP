@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overwatch MCP</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' ry='8' fill='%231f2937'/%3E%3Cpath d='M14 32h36' stroke='%23ffffff' stroke-width='6'/%3E%3Cpath d='M14 22h20' stroke='%233b82f6' stroke-width='6'/%3E%3Cpath d='M14 42h28' stroke='%238b5cf6' stroke-width='6'/%3E%3C/svg%3E" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Habilitar dark mode automático por media query en Tailwind CDN
+    tailwind.config = { darkMode: 'media' };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- anime.js for loader animation -->
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <!-- Google Fonts + Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji','Segoe UI Emoji', 'Segoe UI Symbol', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'wght' 400, 'opsz' 24 }
+    :root {
+      --ow-accent-a: #22d3ee; /* cyan-400 */
+      --ow-accent-b: #a855f7; /* fuchsia-500 */
+    }
+    /* Animated background helpers */
+    @keyframes ow-scan {
+      0% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: -2000; }
+    }
+    @keyframes ow-shift {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .ow-grid-line { stroke: url(#ow-grad); stroke-width: 1; stroke-dasharray: 8 12; animation: ow-scan 18s linear infinite; opacity: .18 }
+    .ow-grid-line.alt { animation-duration: 24s; opacity: .12 }
+    /* Spinner utility */
+    .ow-spin { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    /* eDEX-like panels */
+    .ow-panel {
+      position: relative;
+      border: 1px solid rgba(34,211,238,.25); /* cyan-400 */
+      box-shadow: 0 0 0 1px rgba(168,85,247,.12), 0 0 22px rgba(34,211,238,.08);
+      background-image: radial-gradient(1200px 600px at 10% -20%, rgba(34,211,238,.06), rgba(0,0,0,0));
+    }
+    pre#diagDetail { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    /* Loader overlay */
+    #owLoader { position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center; background: rgba(17,24,39,.88); backdrop-filter: blur(2px); }
+    #owLoader.hidden { display: none; }
+    .ow-loader-dot { width: 10px; height: 10px; border-radius: 9999px; background: #22d3ee; opacity: .9 }
+    .ow-loader-dot.b { background: #a855f7 }
+  </style>
+  <!-- Preline JS (opcional, componentes interactivos por CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/preline/dist/preline.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+  <!-- Global loading overlay -->
+  <div id="owLoader">
+    <div class="flex flex-col items-center gap-4 text-gray-200">
+      <div class="flex gap-2">
+        <div class="ow-loader-dot a"></div>
+        <div class="ow-loader-dot b"></div>
+        <div class="ow-loader-dot a"></div>
+        <div class="ow-loader-dot b"></div>
+      </div>
+      <div class="text-sm">Cargando interfaz…</div>
+    </div>
+  </div>
+  <!-- Animated SVG background -->
+  <div class="fixed inset-0 -z-10 pointer-events-none">
+    <svg class="absolute inset-0 w-full h-full" viewBox="0 0 2000 1200" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="ow-grad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="var(--ow-accent-a)"/>
+          <stop offset="100%" stop-color="var(--ow-accent-b)"/>
+        </linearGradient>
+      </defs>
+      <rect x="0" y="0" width="2000" height="1200" fill="none"/>
+      <!-- Diagonal moving lines -->
+      <g transform="translate(0,0) rotate(-12 1000 600)">
+        <line class="ow-grid-line" x1="0" y1="100" x2="2000" y2="100" />
+        <line class="ow-grid-line alt" x1="0" y1="220" x2="2000" y2="220" />
+        <line class="ow-grid-line" x1="0" y1="340" x2="2000" y2="340" />
+        <line class="ow-grid-line alt" x1="0" y1="460" x2="2000" y2="460" />
+        <line class="ow-grid-line" x1="0" y1="580" x2="2000" y2="580" />
+        <line class="ow-grid-line alt" x1="0" y1="700" x2="2000" y2="700" />
+        <line class="ow-grid-line" x1="0" y1="820" x2="2000" y2="820" />
+        <line class="ow-grid-line alt" x1="0" y1="940" x2="2000" y2="940" />
+        <line class="ow-grid-line" x1="0" y1="1060" x2="2000" y2="1060" />
+      </g>
+    </svg>
+  </div>
+  <div id="owHeader"></div>
+
+  <main class="p-6 space-y-6">
+    <div id="status" class="hidden px-4 py-2 rounded border text-sm"></div>
+    <section class="bg-white dark:bg-gray-800 rounded shadow p-4 ow-panel">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="font-medium flex items-center gap-2"><span class="material-symbols-outlined">stethoscope</span> <span>Diagnóstico</span></h2>
+        <div class="flex items-center gap-2">
+          <span id="diagStatusBadge" class="text-xs px-2 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Idle</span>
+          <button id="btnDiagDetail" class="text-xs text-blue-600 hover:underline hidden">Ver detalle</button>
+          <button id="btnDiagCopy" class="text-xs text-gray-600 dark:text-gray-300 hover:underline hidden">Copiar</button>
+        </div>
+      </div>
+      <div class="w-full bg-gray-200 rounded h-3 overflow-hidden">
+        <div id="diagBar" class="bg-blue-600 h-3 transition-all" style="width:0%"></div>
+      </div>
+      <p id="diagText" class="mt-2 text-sm text-gray-600 dark:text-gray-300">Estado: idle</p>
+      <div id="diagError" class="mt-2 hidden border border-red-300/60 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 text-xs rounded p-2">
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined">error</span>
+          <div>
+            <p class="font-semibold">Error en diagnóstico</p>
+            <pre id="diagErrorMsg" class="whitespace-pre-wrap font-mono"></pre>
+          </div>
+        </div>
+      </div>
+      <div id="diagDetailBox" class="mt-2 hidden">
+        <pre id="diagDetail" class="text-xs overflow-auto bg-gray-900 text-gray-100 p-2 rounded max-h-40"></pre>
+      </div>
+    </section>
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white dark:bg-gray-800 rounded shadow ring-1 ring-gray-200/60 dark:ring-gray-700/50 p-4 lg:order-3 ow-panel">
+        <h2 class="font-medium mb-2 flex items-center gap-2"><span class="material-symbols-outlined">speed</span> <span>CPU</span></h2>
+        <div class="h-36 lg:h-40">
+          <canvas id="cpuChart"></canvas>
+        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-300 mt-2">Núcleos lógicos: <span id="cpuCount">-</span></p>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded shadow ring-1 ring-gray-200/60 dark:ring-gray-700/50 p-4 lg:order-1">
+        <h2 class="font-medium mb-2 flex items-center gap-2"><span class="material-symbols-outlined">memory</span> <span>Memoria</span></h2>
+        <div class="w-full bg-gray-200 rounded h-4">
+          <div id="memBar" class="bg-green-500 h-4 rounded" style="width:0%"></div>
+        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-300 mt-2">Uso: <span id="memPercent">-</span>%</p>
+        <div class="mt-2 flex flex-wrap gap-2 text-xs">
+          <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-gray-100 dark:bg-gray-700"><span class="material-symbols-outlined text-sm">monitor_heart</span> CPU: <span id="sensorsUsageCpu">--</span>%</span>
+          <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-gray-100 dark:bg-gray-700"><span class="material-symbols-outlined text-sm">memory</span> RAM: <span id="sensorsUsageRam">--</span>%</span>
+          <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-gray-100 dark:bg-gray-700"><span class="material-symbols-outlined text-sm">storage</span> Disco: <span id="sensorsUsageDisk">--</span>%</span>
+          <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-gray-100 dark:bg-gray-700"><span class="material-symbols-outlined text-sm">memory_alt</span> GPU: <span id="sensorsUsageGpu">N/A</span></span>
+        </div>
+        <!-- Sensores: CPU/GPU/RAM/Disk temps + red principal -->
+        <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+          <div class="flex items-center gap-2"><span class="material-symbols-outlined">device_thermostat</span> CPU: <span id="sensorsCpuTemp">--</span> °C</div>
+          <div class="flex items-center gap-2"><span class="material-symbols-outlined">device_thermostat</span> GPU: <span id="sensorsGpuTemp">--</span> °C</div>
+          <div class="flex items-center gap-2"><span class="material-symbols-outlined">memory</span> RAM temp: <span id="sensorsRamTemp">--</span> °C</div>
+          <div class="flex items-center gap-2"><span class="material-symbols-outlined">storage</span> Disco temp: <span id="sensorsDiskTemp">--</span> °C</div>
+          <div class="flex items-center gap-2 sm:col-span-2"><span class="material-symbols-outlined">lan</span> NIC: <span id="sensorsNetName">--</span> · <span id="sensorsNetMbps">--</span> Mbps</div>
+        </div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded shadow ring-1 ring-gray-200/60 dark:ring-gray-700/50 p-4 lg:order-2">
+        <h2 class="font-medium mb-2 flex items-center gap-2"><span class="material-symbols-outlined">storage</span> <span>Discos</span></h2>
+        <ul id="diskList" class="text-sm grid grid-cols-1 sm:grid-cols-2 gap-3"></ul>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white dark:bg-gray-800 rounded shadow p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="font-medium">Top procesos (Memoria)</h2>
+          <button id="refreshProcMem" class="text-blue-600 text-sm">Actualizar</button>
+        </div>
+        <div class="overflow-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-gray-100 dark:bg-gray-700">
+              <tr>
+                <th class="px-2 py-1 text-left">PID</th>
+                <th class="px-2 py-1 text-left">Nombre</th>
+                <th class="px-2 py-1 text-right">RSS</th>
+              </tr>
+            </thead>
+            <tbody id="tblProcMem"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 rounded shadow p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="font-medium">Top procesos (CPU)</h2>
+          <button id="refreshProcCpu" class="text-blue-600 text-sm">Actualizar</button>
+        </div>
+        <div class="overflow-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-gray-100 dark:bg-gray-700">
+              <tr>
+                <th class="px-2 py-1 text-left">PID</th>
+                <th class="px-2 py-1 text-left">Nombre</th>
+                <th class="px-2 py-1 text-right">CPU %</th>
+              </tr>
+            </thead>
+            <tbody id="tblProcCpu"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-white dark:bg-gray-800 rounded shadow p-4">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="font-medium">Conexiones de red</h2>
+        <button id="refreshConns" class="text-blue-600 text-sm">Actualizar</button>
+      </div>
+      <div class="overflow-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-gray-100 dark:bg-gray-700">
+            <tr>
+              <th class="px-2 py-1 text-left">PID</th>
+              <th class="px-2 py-1 text-left">Proceso</th>
+              <th class="px-2 py-1 text-left">Local</th>
+              <th class="px-2 py-1 text-left">Remoto</th>
+              <th class="px-2 py-1 text-left">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tblConns"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="bg-white dark:bg-gray-800 rounded shadow p-4">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="font-medium">Almacenamiento (Top carpetas/archivos pesados)</h2>
+        <button id="refreshFsHeavy" class="text-blue-600 text-sm">Actualizar</button>
+      </div>
+      <div id="fsHeavy" class="text-sm space-y-4"></div>
+    </section>
+
+    <section class="bg-white dark:bg-gray-800 rounded shadow p-4">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="font-medium">Hosts remotos (agregado)</h2>
+        <button id="refreshHosts" class="text-blue-600 text-sm">Actualizar</button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <h3 class="font-medium mb-1">Por Host</h3>
+          <div class="overflow-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-gray-100 dark:bg-gray-700">
+                <tr>
+                  <th class="px-2 py-1 text-left">Host</th>
+                  <th class="px-2 py-1 text-right">Conns</th>
+                  <th class="px-2 py-1 text-left">Procesos</th>
+                </tr>
+              </thead>
+              <tbody id="tblHosts"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h3 class="font-medium mb-1">Por Proceso</h3>
+          <div class="overflow-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-gray-100 dark:bg-gray-700">
+                <tr>
+                  <th class="px-2 py-1 text-left">Proceso</th>
+                  <th class="px-2 py-1 text-left">PID</th>
+                  <th class="px-2 py-1 text-left">Hosts</th>
+                </tr>
+              </thead>
+              <tbody id="tblNetProcs"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    
+  </main>
+
+  <!-- Modal de confirmación GameBooster -->
+  <div id="gbConfirmModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/40"></div>
+    <div class="relative mx-auto mt-24 max-w-md bg-white dark:bg-gray-800 rounded shadow p-4">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="material-symbols-outlined text-amber-600">warning</span>
+        <h3 class="font-medium">Confirmar acción</h3>
+      </div>
+      <p id="gbConfirmMsg" class="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap"></p>
+      <div class="mt-3 flex justify-end gap-2">
+        <button id="gbConfirmCancel" class="px-3 py-1.5 rounded bg-gray-200 dark:bg-gray-700">Cancelar</button>
+        <button id="gbConfirmOk" class="px-3 py-1.5 rounded bg-red-600 text-white">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/header.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

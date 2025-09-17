@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "mcp-win-admin": {
+      "command": "python",
+      "args": [
+        "-m",
+        "mcp",
+        "dev",
+        ".\\mcp_win_admin\\server.py",
+        "--with-editable",
+        "."
+      ],
+      "env": {
+        "MCP_FREE_ONLY_SOURCES": "true",
+        "MCP_LIGHT_MODE": "true",
+        "MCP_DEFAULT_REP_TTL": "86400",
+        "MCP_DB_MAINT_ENABLED": "true",
+        "MCP_DB_MAINT_ON_START": "true"
+      }
+    }
+  }
+}

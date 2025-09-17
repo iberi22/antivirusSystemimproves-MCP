@@ -1,0 +1,26 @@
+[package]
+name = "overwatch-mcp"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0"
+clap = { version = "4.5", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.38", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
+rmcp = { version = "0.5", features = ["server"] }
+sysinfo = { version = "0.30" }
+
+# Optional Windows APIs (enable with `--features win`)
+windows = { version = "0.58.0", optional = true, features = [
+    "Win32_Foundation",
+    "Win32_System_Diagnostics_ToolHelp",
+    "Win32_System_Threading",
+    "Win32_System_ProcessStatus",
+] }
+
+[features]
+win = ["windows"]

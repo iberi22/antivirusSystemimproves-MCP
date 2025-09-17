@@ -1,0 +1,56 @@
+name: CI - Rust MCP build and smoke test
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test-windows:
+    runs-on: windows-latest
+    env:
+      CARGO_TERM_COLOR: always
+      CARGO_TARGET_DIR: target-rs-mcp
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            native/overwatch-mcp-rs/target-rs-mcp
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build Rust (release)
+        working-directory: native/overwatch-mcp-rs
+        run: cargo build --release
+
+      - name: Upload artifact (overwatch-mcp.exe)
+        uses: actions/upload-artifact@v4
+        with:
+          name: overwatch-mcp-windows-release
+          path: native/overwatch-mcp-rs/target-rs-mcp/release/overwatch-mcp.exe
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install project deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Smoke test stdio (Python -> Rust MCP)
+        env:
+          OVERWATCH_MCP_BIN: ${{ github.workspace }}\native\overwatch-mcp-rs\target-rs-mcp\release\overwatch-mcp.exe
+        run: |
+          python scripts/mcp_smoketest_overwatch_rs.py
