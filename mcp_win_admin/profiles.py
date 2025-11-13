@@ -38,6 +38,13 @@ PROFILES: Dict[str, List[ActionSuggestion]] = {
             description="Monitorizar recursos y sugerir limpieza de disco temporal si es necesario.",
         )
     ],
+    "AggressiveScan": [
+        ActionSuggestion(
+            key="full_system_scan",
+            description="Realizar un escaneo completo del sistema, incluyendo escaneo de firmas y de comportamiento.",
+            requires_elevation=True,
+        )
+    ],
 }
 
 

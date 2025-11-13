@@ -9,6 +9,7 @@ from . import processes as procmod
 from . import profiles as profmod
 from . import system as sysmod
 from . import av as avmod
+from . import behavioral as bhvmod
 from . import services as svcmod
 from . import connections as conmod
 from . import events as evtmod
@@ -196,6 +197,22 @@ def av_scan_path(target: str, recursive: bool = True, limit: int = 1000, algo: s
     if sources_csv == "malwarebazaar,teamcymru" and not cfg.FREE_ONLY_SOURCES:
         sources = ("virustotal", "malwarebazaar", "teamcymru")
     return avmod.scan_path(target, recursive=recursive, limit=limit, algo=algo, use_cloud=use_cloud, sources=sources, ttl_seconds=ttl)
+
+
+@mcp.tool()
+def av_scan_path_modern(target: str, limit: int = 1000, algo: str = "sha256", use_cloud: bool = False, ttl_seconds: int = -1, sources_csv: str = "malwarebazaar,teamcymru", use_behavioral_scan: bool = False) -> list[dict]:
+    """Escanea archivos (recursivamente) con el nuevo motor de Rust y, opcionalmente, realiza un escaneo de comportamiento."""
+    ttl = cfg.effective_rep_ttl(ttl_seconds)
+    sources = tuple(s.strip() for s in sources_csv.split(",") if s.strip()) or ("malwarebazaar", "teamcymru")
+    if sources_csv == "malwarebazaar,teamcymru" and not cfg.FREE_ONLY_SOURCES:
+        sources = ("virustotal", "malwarebazaar", "teamcymru")
+    return avmod.scan_path_modern(target, limit=limit, algo=algo, use_cloud=use_cloud, sources=sources, ttl_seconds=ttl, use_behavioral_scan=use_behavioral_scan)
+
+
+@mcp.tool()
+def behavioral_scan() -> list[dict]:
+    """Realiza un escaneo de comportamiento para detectar procesos sospechosos."""
+    return bhvmod.check_running_processes()
 
 
 # ---------------------------- Windows Services ----------------------------

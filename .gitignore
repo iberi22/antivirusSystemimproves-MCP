@@ -27,3 +27,7 @@ Thumbs.db
 # SQLite / local state
 *.sqlite3
 .mcp_win_admin/
+
+# Rust build artifacts
+target/
+*.so

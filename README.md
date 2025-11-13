@@ -47,8 +47,8 @@ También puedes instalarlo en clientes compatibles (Windsurf/Cascade, Claude Des
   - `services_list` – (placeholder) Próxima iteración.
   - `logs_query_eventlog` – (placeholder) Próxima iteración.
 - Perfiles:
-  - `profiles_list` – Lista perfiles.
-  - `profiles_preview` – Muestra acciones sugeridas (p.ej. GameBooster) sin ejecutarlas.
+  - `profiles_list` – Lista perfiles, incluyendo "AggressiveScan".
+  - `profiles_preview` – Muestra acciones sugeridas (p.ej. GameBooster, AggressiveScan) sin ejecutarlas.
 - SQLite (WAL):
   - Snapshots de sistema y hallazgos para comparar estados.
 
@@ -291,6 +291,10 @@ mcp dev .\mcp_win_admin\server.py --with-editable .
 - Mantenimiento BD:
   - `db_optimize()`
   - `db_purge_old(events_ttl_seconds=2592000, reputation_ttl_seconds=7776000, hash_ttl_seconds=15552000)`
+
+- Escaneo Moderno (con motor de Rust):
+  - `av_scan_path_modern(target, use_behavioral_scan=true)`
+  - `behavioral_scan()`
 
 - Modo ligero (variables recomendadas):
   - `MCP_LIGHT_MODE=true`
