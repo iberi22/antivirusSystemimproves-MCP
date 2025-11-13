@@ -242,7 +242,7 @@ def fs_top_dirs(
 ) -> list[dict]:
     """Lista directorios más pesados bajo `root` hasta `max_depth`.
 
-    - root: raíz a analizar (e.g., C:\)
+    - root: raíz a analizar (e.g., C:\\)
     - max_depth: profundidad máxima de análisis (2-3 recomendado)
     - top_n: cantidad de directorios a devolver
     - min_size_mb: umbral mínimo en MB
