@@ -181,10 +181,9 @@ def av_check_hash(hash_hex: str, algo: str = "sha256", use_cloud: bool = True, t
 
     Requiere variable de entorno VT_API_KEY para consultas en la nube.
     """
-    sources = tuple(s.strip() for s in sources_csv.split(",") if s.strip()) or ("virustotal",)
-    # Si el usuario no personalizó fuentes (usa el default) y FREE_ONLY_SOURCES está desactivado, ampliamos para incluir VT
-    if sources_csv == "malwarebazaar,teamcymru" and not cfg.FREE_ONLY_SOURCES:
-        sources = ("virustotal", "malwarebazaar", "teamcymru")
+    default_sources = ("malwarebazaar", "teamcymru")
+    extended_sources = ("virustotal", "malwarebazaar", "teamcymru")
+    sources = cfg.get_effective_sources(sources_csv, default_sources, extended_sources)
     ttl = cfg.effective_rep_ttl(ttl_seconds)
     return avmod.check_hash(hash_hex, algo=algo, use_cloud=use_cloud, sources=sources, ttl_seconds=ttl)
 
@@ -193,9 +192,9 @@ def av_check_hash(hash_hex: str, algo: str = "sha256", use_cloud: bool = True, t
 def av_scan_path(target: str, recursive: bool = True, limit: int = 1000, algo: str = "sha256", use_cloud: bool = False, ttl_seconds: int = -1, sources_csv: str = "malwarebazaar,teamcymru") -> list[dict]:
     """Escanea archivos bajo un path (archivo o carpeta) y contrasta hashes. No desinfecta."""
     ttl = cfg.effective_rep_ttl(ttl_seconds)
-    sources = tuple(s.strip() for s in sources_csv.split(",") if s.strip()) or ("malwarebazaar", "teamcymru")
-    if sources_csv == "malwarebazaar,teamcymru" and not cfg.FREE_ONLY_SOURCES:
-        sources = ("virustotal", "malwarebazaar", "teamcymru")
+    default_sources = ("malwarebazaar", "teamcymru")
+    extended_sources = ("virustotal", "malwarebazaar", "teamcymru")
+    sources = cfg.get_effective_sources(sources_csv, default_sources, extended_sources)
     return avmod.scan_path(target, recursive=recursive, limit=limit, algo=algo, use_cloud=use_cloud, sources=sources, ttl_seconds=ttl)
 
 
@@ -203,9 +202,9 @@ def av_scan_path(target: str, recursive: bool = True, limit: int = 1000, algo: s
 def av_scan_path_modern(target: str, limit: int = 1000, algo: str = "sha256", use_cloud: bool = False, ttl_seconds: int = -1, sources_csv: str = "malwarebazaar,teamcymru", use_behavioral_scan: bool = False) -> list[dict]:
     """Escanea archivos (recursivamente) con el nuevo motor de Rust y, opcionalmente, realiza un escaneo de comportamiento."""
     ttl = cfg.effective_rep_ttl(ttl_seconds)
-    sources = tuple(s.strip() for s in sources_csv.split(",") if s.strip()) or ("malwarebazaar", "teamcymru")
-    if sources_csv == "malwarebazaar,teamcymru" and not cfg.FREE_ONLY_SOURCES:
-        sources = ("virustotal", "malwarebazaar", "teamcymru")
+    default_sources = ("malwarebazaar", "teamcymru")
+    extended_sources = ("virustotal", "malwarebazaar", "teamcymru")
+    sources = cfg.get_effective_sources(sources_csv, default_sources, extended_sources)
     return avmod.scan_path_modern(target, limit=limit, algo=algo, use_cloud=use_cloud, sources=sources, ttl_seconds=ttl, use_behavioral_scan=use_behavioral_scan)
 
 
@@ -341,9 +340,9 @@ def integrity_diff_baselines(name_a: str, name_b: str) -> dict:
 @mcp.tool()
 def rep_check_ip(ip: str, use_cloud: bool = True, ttl_seconds: int = -1, sources_csv: str = "threatfox,urlhaus", ttl_by_source_json: str = "") -> dict:
     """Consulta reputación de IP (ThreatFox/URLHaus/VT si disponible) con caché local y TTL."""
-    sources = tuple(s.strip() for s in sources_csv.split(",") if s.strip()) or ("threatfox",)
-    if sources_csv == "threatfox,urlhaus" and not cfg.FREE_ONLY_SOURCES:
-        sources = ("threatfox", "urlhaus", "virustotal", "otx", "greynoise", "abuseipdb")
+    default_sources = ("threatfox", "urlhaus")
+    extended_sources = ("threatfox", "urlhaus", "virustotal", "otx", "greynoise", "abuseipdb")
+    sources = cfg.get_effective_sources(sources_csv, default_sources, extended_sources)
     ttl = cfg.effective_rep_ttl(ttl_seconds)
     ttl_by_source = None
     if ttl_by_source_json:
@@ -357,9 +356,9 @@ def rep_check_ip(ip: str, use_cloud: bool = True, ttl_seconds: int = -1, sources
 @mcp.tool()
 def rep_check_domain(domain: str, use_cloud: bool = True, ttl_seconds: int = -1, sources_csv: str = "threatfox,urlhaus", ttl_by_source_json: str = "") -> dict:
     """Consulta reputación de dominio (ThreatFox/URLHaus/VT si disponible) con caché local y TTL."""
-    sources = tuple(s.strip() for s in sources_csv.split(",") if s.strip()) or ("threatfox",)
-    if sources_csv == "threatfox,urlhaus" and not cfg.FREE_ONLY_SOURCES:
-        sources = ("threatfox", "urlhaus", "virustotal", "otx")
+    default_sources = ("threatfox", "urlhaus")
+    extended_sources = ("threatfox", "urlhaus", "virustotal", "otx")
+    sources = cfg.get_effective_sources(sources_csv, default_sources, extended_sources)
     ttl = cfg.effective_rep_ttl(ttl_seconds)
     ttl_by_source = None
     if ttl_by_source_json:
@@ -377,9 +376,9 @@ def connections_list_enriched(limit: int = 100, kind: str = "inet", listening_on
     items = conmod.list_connections(limit=lim, kind=kind, listening_only=listening_only, include_process=include_process)
     # Construir set de IPs remotas
     ips: dict[str, dict] = {}
-    sources = tuple(s.strip() for s in rep_sources_csv.split(",") if s.strip()) or ("threatfox",)
-    if rep_sources_csv == "threatfox,urlhaus" and not cfg.FREE_ONLY_SOURCES:
-        sources = ("threatfox", "urlhaus", "virustotal", "otx", "greynoise", "abuseipdb")
+    default_sources = ("threatfox", "urlhaus")
+    extended_sources = ("threatfox", "urlhaus", "virustotal", "otx", "greynoise", "abuseipdb")
+    sources = cfg.get_effective_sources(rep_sources_csv, default_sources, extended_sources)
     ttl = cfg.effective_rep_ttl(rep_ttl_seconds)
     ttl_by_source = None
     if rep_ttl_by_source_json:
