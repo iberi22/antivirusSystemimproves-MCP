@@ -52,7 +52,7 @@ Se han añadido capacidades de escaneo de alto rendimiento con Rust y detección
 |-------|--------------------------------------------------|-----------|-------------|-------------|
 | TD-01 | Añadir services list y estado                    | MEDIA     | ✅ Completado | Jules       |
 | TD-02 | Consulta básica de Windows Event Log             | MEDIA     | ✅ Completado | Jules       |
-| F1-09 | Validar con MCP Inspector                                 | ALTA      | ✅ Completado  | Jules       |
+| TD-03 | Añadir logging a Windows Event Log               | BAJA      | ✅ Completado | Jules       |
 | TD-04 | Definir acciones seguras GameBooster (consent)   | ALTA      | ✅ Completado  | Jules       |
 
 ---
