@@ -339,7 +339,7 @@ def scan_path_modern(
         if limit:
             path_hashes = path_hashes[:limit]
 
-        for path, h in path_hashes:
+        for path, h, _, _ in path_hashes:
             try:
                 verdict = check_hash(h, algo=algo, use_cloud=use_cloud, sources=sources, ttl_seconds=ttl_seconds)
                 results.append({

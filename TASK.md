@@ -54,6 +54,7 @@ Se han añadido capacidades de escaneo de alto rendimiento con Rust y detección
 | TD-02 | Consulta básica de Windows Event Log             | MEDIA     | ✅ Completado | Jules       |
 | TD-03 | Añadir logging a Windows Event Log               | BAJA      | ✅ Completado | Jules       |
 | TD-04 | Definir acciones seguras GameBooster (consent)   | ALTA      | ✅ Completado  | Jules       |
+| TD-05 | Optimizar módulo de integridad con Rust          | MEDIA     | ✅ Completado | Jules       |
 
 ---
 ## 📝 Tareas Descubiertas Durante el Desarrollo
