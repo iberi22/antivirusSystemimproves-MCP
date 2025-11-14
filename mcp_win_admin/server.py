@@ -8,6 +8,7 @@ from . import db
 from . import processes as procmod
 from . import profiles as profmod
 from . import system as sysmod
+from . import actions as actmod
 from . import av as avmod
 from . import behavioral as bhvmod
 from . import services as svcmod
@@ -133,6 +134,12 @@ def profiles_list() -> list[dict]:
 def profiles_preview(name: str) -> dict:
     """Muestra las acciones sugeridas por un perfil (sin ejecutar cambios)."""
     return profmod.preview_profile(name)
+
+
+@mcp.tool()
+def profiles_execute(profile_name: str, action_key: str, confirm: bool = False) -> dict:
+    """Ejecuta una acción de un perfil (requiere confirmación)."""
+    return profmod.execute_profile_action(profile_name, action_key, confirm)
 
 
 @mcp.resource("snapshot://last")

@@ -292,6 +292,9 @@ mcp dev .\mcp_win_admin\server.py --with-editable .
   - `db_optimize()`
   - `db_purge_old(events_ttl_seconds=2592000, reputation_ttl_seconds=7776000, hash_ttl_seconds=15552000)`
 
+- Ejecución de Perfiles:
+  - `profiles_execute(profile_name="GameBooster", action_key="switch_power_plan", confirm=true)`
+
 - Escaneo Moderno (con motor de Rust):
   - `av_scan_path_modern(target, use_behavioral_scan=true)`
   - `behavioral_scan()`

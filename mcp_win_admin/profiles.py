@@ -1,79 +1,58 @@
 from __future__ import annotations
+from typing import Any, Callable, Dict, List
+from . import actions
 
-from dataclasses import asdict, dataclass
-from typing import Dict, List
+# Definición de una acción de perfil como una función que puede ser ejecutada.
+# El primer argumento de la función siempre debe ser `confirm: bool`.
+ProfileAction = Callable[..., Dict[str, Any]]
 
-
-@dataclass
-class ActionSuggestion:
-    key: str
-    description: str
-    requires_elevation: bool = False
-
-    def to_dict(self) -> Dict:
-        return asdict(self)
-
-
-# Perfiles iniciales de ejemplo (solo vista previa, no ejecutan cambios)
-PROFILES: Dict[str, List[ActionSuggestion]] = {
-    "GameBooster": [
-        ActionSuggestion(
-            key="stop_background_apps",
-            description="Sugerir cierre de apps en segundo plano con alto consumo (previo análisis).",
+PROFILES: Dict[str, Dict[str, ProfileAction]] = {
+    "GameBooster": {
+        "switch_power_plan": lambda confirm=False: actions.set_power_plan(
+            actions.HIGH_PERFORMANCE_GUID, confirm=confirm
         ),
-        ActionSuggestion(
-            key="switch_power_plan",
-            description="Sugerir plan de energía Alto Rendimiento (sin aplicar automáticamente).",
-            requires_elevation=False,
+        "stop_non_essential_services": lambda confirm=False: actions.stop_service(
+            "wuauserv", confirm=confirm  # Ejemplo: Windows Update
         ),
-        ActionSuggestion(
-            key="disable_unneeded_services",
-            description="Sugerir deshabilitar servicios no críticos durante la sesión de juego (reversible).",
-            requires_elevation=True,
-        ),
-    ],
-    "Balanced": [
-        ActionSuggestion(
-            key="monitor_health",
-            description="Monitorizar recursos y sugerir limpieza de disco temporal si es necesario.",
-        )
-    ],
-    "AggressiveScan": [
-        ActionSuggestion(
-            key="full_system_scan",
-            description="Realizar un escaneo completo del sistema, incluyendo escaneo de firmas y de comportamiento.",
-            requires_elevation=True,
-        )
-    ],
+    },
+    "Balanced": {},
+    "AggressiveScan": {},
 }
 
-
 def list_profiles() -> List[Dict]:
+    """Lista los perfiles disponibles y sus acciones."""
     return [
-        {
-            "name": name,
-            "actions": [a.to_dict() for a in actions],
-            "actions_count": len(actions),
-        }
+        {"name": name, "actions": list(actions.keys())}
         for name, actions in PROFILES.items()
     ]
 
-
 def preview_profile(name: str) -> Dict:
-    actions = PROFILES.get(name)
-    if not actions:
-        return {
-            "name": name,
-            "exists": False,
-            "message": "Perfil no encontrado",
-        }
+    """Muestra una vista previa de las acciones de un perfil (sin ejecutarlas)."""
+    profile_actions = PROFILES.get(name)
+    if profile_actions is None:
+        return {"name": name, "exists": False, "message": "Perfil no encontrado"}
+
+    preview_results = [
+        action(confirm=False) for action in profile_actions.values()
+    ]
     return {
         "name": name,
         "exists": True,
-        "summary": f"{len(actions)} acciones sugeridas (sin aplicar)",
-        "actions": [a.to_dict() for a in actions],
-        "security": {
-            "requires_elevation": any(a.requires_elevation for a in actions),
-            "notes": "Las acciones requieren consentimiento explícito antes de cualquier cambio.",
-        },
+        "summary": f"{len(preview_results)} acciones sugeridas (sin aplicar)",
+        "actions": preview_results,
     }
+
+def execute_profile_action(profile_name: str, action_key: str, confirm: bool = False) -> Dict:
+    """Ejecuta una acción específica de un perfil."""
+    if not confirm:
+        return {"error": "Se requiere confirmación para ejecutar una acción."}
+
+    profile_actions = PROFILES.get(profile_name)
+    if profile_actions is None:
+        return {"error": f"Perfil '{profile_name}' no encontrado."}
+
+    action_to_run = profile_actions.get(action_key)
+    if action_to_run is None:
+        return {"error": f"Acción '{action_key}' no encontrada en el perfil '{profile_name}'."}
+
+    return action_to_run(confirm=True)
