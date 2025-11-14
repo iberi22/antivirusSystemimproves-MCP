@@ -22,16 +22,17 @@ fn hash_file(path: &str) -> PyResult<String> {
 }
 
 #[pyfunction]
-fn scan_path_parallel(path: String) -> PyResult<Vec<String>> {
+fn scan_path_parallel(path: String) -> PyResult<Vec<(String, String)>> {
     let walker = WalkDir::new(path).into_iter();
 
-    let hashes: Vec<String> = walker
+    let hashes: Vec<(String, String)> = walker
         .filter_map(|e| e.ok())
         .par_bridge()
         .filter_map(|entry| {
             if entry.file_type().is_file() {
-                if let Ok(hash) = hash_file(entry.path().to_str().unwrap()) {
-                    Some(hash)
+                let path_str = entry.path().to_str().unwrap_or("").to_string();
+                if let Ok(hash) = hash_file(&path_str) {
+                    Some((path_str, hash))
                 } else {
                     None
                 }

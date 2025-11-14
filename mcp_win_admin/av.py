@@ -335,22 +335,22 @@ def scan_path_modern(
         results.extend(behavioral.check_running_processes())
 
     try:
-        hashes = scanner.scan_path_parallel(target)
+        path_hashes = scanner.scan_path_parallel(target)
         if limit:
-            hashes = hashes[:limit]
+            path_hashes = path_hashes[:limit]
 
-        for h in hashes:
+        for path, h in path_hashes:
             try:
                 verdict = check_hash(h, algo=algo, use_cloud=use_cloud, sources=sources, ttl_seconds=ttl_seconds)
                 results.append({
-                    "path": target,
+                    "path": path,
                     "algo": algo,
                     "hash": h,
                     "verdict": verdict.get("verdict", "unknown"),
                     "details": verdict,
                 })
             except Exception as e:
-                results.append({"path": target, "hash": h, "error": str(e)})
+                results.append({"path": path, "hash": h, "error": str(e)})
     except Exception as e:
         results.append({"path": target, "error": str(e)})
 

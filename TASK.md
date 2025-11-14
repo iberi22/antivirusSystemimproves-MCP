@@ -50,8 +50,8 @@ Se han añadido capacidades de escaneo de alto rendimiento con Rust y detección
 ## 👾 Deuda Técnica y Mejoras Pendientes
 | ID    | Tarea                                            | Prioridad | Estado      | Responsable |
 |-------|--------------------------------------------------|-----------|-------------|-------------|
-| TD-01 | Añadir services list y estado                    | MEDIA     | ⬜ Pendiente | Cascade     |
-| TD-02 | Consulta básica de Windows Event Log             | MEDIA     | ⬜ Pendiente | Cascade     |
+| TD-01 | Añadir services list y estado                    | MEDIA     | ✅ Completado | Jules       |
+| TD-02 | Consulta básica de Windows Event Log             | MEDIA     | ✅ Completado | Jules       |
 | TD-03 | Añadir logging a Windows Event Log               | BAJA      | ⬜ Pendiente | Cascade     |
 | TD-04 | Definir acciones seguras GameBooster (consent)   | ALTA      | ⬜ Pendiente | Cascade     |
 
