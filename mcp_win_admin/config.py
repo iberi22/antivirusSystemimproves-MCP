@@ -74,3 +74,24 @@ def effective_rep_ttl(ttl_seconds: Optional[int]) -> Optional[int]:
     if ttl_seconds is None or ttl_seconds < 0:
         return DEFAULT_REP_TTL if LIGHT_MODE else None
     return int(ttl_seconds)
+
+
+def get_effective_sources(sources_csv: str, default_sources: tuple[str, ...], extended_sources: tuple[str, ...]) -> tuple[str, ...]:
+    """
+    Determina las fuentes efectivas a utilizar basándose en el `sources_csv` proporcionado,
+    la configuración de `FREE_ONLY_SOURCES` y las fuentes predeterminadas/extendidas.
+    """
+    # Analiza el `sources_csv` proporcionado por el usuario.
+    user_sources = tuple(s.strip() for s in sources_csv.split(",") if s.strip())
+
+    # Si el usuario no proporcionó ninguna fuente, usa las predeterminadas.
+    if not user_sources:
+        return default_sources
+
+    # Si el usuario especificó fuentes explícitamente, úsalas.
+    # Pero si el usuario usó las fuentes predeterminadas Y `FREE_ONLY_SOURCES` está desactivado,
+    # entonces extiende las fuentes para incluir las no gratuitas.
+    if user_sources == default_sources and not FREE_ONLY_SOURCES:
+        return extended_sources
+
+    return user_sources

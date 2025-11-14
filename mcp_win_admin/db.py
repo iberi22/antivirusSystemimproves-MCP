@@ -205,6 +205,8 @@ def get_last_snapshot(db_path: Optional[Path] = None) -> Optional[Dict[str, Any]
         return dict(row) if row else None
 
 
+from . import events as evtmod
+
 def log_event(level: str, message: str, code: Optional[str] = None, db_path: Optional[Path] = None) -> int:
     now = datetime.now(timezone.utc).isoformat()
     with get_conn(db_path) as conn:
@@ -212,6 +214,10 @@ def log_event(level: str, message: str, code: Optional[str] = None, db_path: Opt
             "INSERT INTO events (ts_utc, level, code, message) VALUES (?, ?, ?, ?)",
             (now, level.upper(), code, message),
         )
+        try:
+            evtmod.log_event_to_windows("MCP-Windows-Admin", 1000, strings=[message])
+        except Exception:
+            pass # No queremos que un fallo de log detenga la app
         return int(cur.lastrowid)
 
 

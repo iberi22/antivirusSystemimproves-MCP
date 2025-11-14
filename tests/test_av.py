@@ -24,3 +24,22 @@ def test_check_hash_cache_only_unknown():
     assert out["hash"] == h
     assert out["algo"] == "sha256"
     assert out["verdict"] in {"unknown", "clean", "suspicious", "malicious"}
+
+
+def test_scan_path_modern_returns_paths(tmp_path: Path):
+    """Verifica que av_scan_path_modern devuelve las rutas de archivo correctas."""
+    # Crea algunos archivos de prueba
+    (tmp_path / "a").mkdir()
+    (tmp_path / "a" / "f1.txt").write_text("file 1")
+    (tmp_path / "f2.txt").write_text("file 2")
+
+    # Escanea el directorio
+    results = av.scan_path_modern(str(tmp_path), use_cloud=False)
+
+    # Verifica que los resultados contienen las rutas de archivo correctas
+    paths = {item.get("path") for item in results}
+    expected_paths = {
+        str(tmp_path / "a" / "f1.txt"),
+        str(tmp_path / "f2.txt"),
+    }
+    assert paths == expected_paths

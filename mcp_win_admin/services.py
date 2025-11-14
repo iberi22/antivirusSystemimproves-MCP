@@ -11,6 +11,9 @@ def list_services(status: Optional[str] = None, limit: int = 200) -> List[Dict]:
     - status: filtra por estado (e.g., 'running', 'stopped'). None = todos.
     - limit: máximo de resultados.
     """
+    if not hasattr(psutil, "win_service_iter"):
+        return [{"error": "Esta función solo es compatible con Windows."}]
+
     items: List[Dict] = []
     try:
         for s in psutil.win_service_iter():  # type: ignore[attr-defined]

@@ -10,6 +10,8 @@ import time
 
 from . import db
 from . import config as cfg
+from . import scanner
+from . import behavioral
 
 
 SUPPORTED_ALGOS = ("sha256", "md5", "sha1")
@@ -312,3 +314,44 @@ def malwarebazaar_lookup_hash(hash_hex: str, *, client: Optional[httpx.Client] =
     finally:
         if close_client:
             client.close()
+
+def scan_path_modern(
+    target: str,
+    *,
+    limit: Optional[int] = 1000,
+    algo: str = "sha256",
+    use_cloud: bool = False,
+    sources: Tuple[str, ...] = ("malwarebazaar", "teamcymru"),
+    ttl_seconds: Optional[int] = None,
+    use_behavioral_scan: bool = False,
+) -> List[Dict]:
+    """Scan a path (file or directory) computing hashes and checking verdicts.
+
+    limit caps the number of files to avoid extremely long scans.
+    """
+    results: List[Dict] = []
+
+    if use_behavioral_scan:
+        results.extend(behavioral.check_running_processes())
+
+    try:
+        path_hashes = scanner.scan_path_parallel(target)
+        if limit:
+            path_hashes = path_hashes[:limit]
+
+        for path, h, _, _ in path_hashes:
+            try:
+                verdict = check_hash(h, algo=algo, use_cloud=use_cloud, sources=sources, ttl_seconds=ttl_seconds)
+                results.append({
+                    "path": path,
+                    "algo": algo,
+                    "hash": h,
+                    "verdict": verdict.get("verdict", "unknown"),
+                    "details": verdict,
+                })
+            except Exception as e:
+                results.append({"path": path, "hash": h, "error": str(e)})
+    except Exception as e:
+        results.append({"path": target, "error": str(e)})
+
+    return results

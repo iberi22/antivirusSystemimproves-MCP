@@ -1,76 +1,42 @@
-import os
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, List, Optional
 
 from . import db
-from .av import _hash_file
-
-
-@dataclass
-class FileInfo:
-    path: str
-    hash: str
-    size: int
-    mtime: float
-
-
-def _walk_files(base: Path, recursive: bool = True, limit: Optional[int] = None) -> Iterable[Path]:
-    count = 0
-    if base.is_file():
-        yield base
-        return
-    if recursive:
-        for root, _, files in os.walk(base):
-            for name in files:
-                p = Path(root) / name
-                yield p
-                count += 1
-                if limit and count >= limit:
-                    return
-    else:
-        for p in base.iterdir():
-            if p.is_file():
-                yield p
-                count += 1
-                if limit and count >= limit:
-                    return
+from . import scanner
 
 
 def build_baseline(name: str, root_path: str, *, algo: str = "sha256", recursive: bool = True, limit: Optional[int] = 10000) -> Dict:
-    base = Path(root_path).expanduser()
-    files = list(_walk_files(base, recursive=recursive, limit=limit))
-    baseline_id = db.insert_integrity_baseline(name=name, root_path=str(base), algo=algo)
+    file_infos = scanner.scan_path_parallel(root_path)
+    if limit:
+        file_infos = file_infos[:limit]
+
+    baseline_id = db.insert_integrity_baseline(name=name, root_path=root_path, algo=algo)
     batch: List[Dict] = []
-    for f in files:
-        try:
-            st = f.stat()
-            h = _hash_file(f, algo)
-            batch.append({
-                "path": str(f.resolve()),
-                "hash": h,
-                "size": int(st.st_size),
-                "mtime": float(st.st_mtime),
-            })
-        except Exception:
-            continue
+    for path, hash_val, size, mtime in file_infos:
+        batch.append({
+            "path": path,
+            "hash": hash_val,
+            "size": size,
+            "mtime": mtime,
+        })
+
     if batch:
         db.insert_integrity_files_batch(baseline_id=baseline_id, items=batch)
-    return {"baseline_id": baseline_id, "name": name, "root_path": str(base), "algo": algo, "files_indexed": len(batch)}
-
-
-essential_keys = ("path", "hash", "size", "mtime")
+    return {"baseline_id": baseline_id, "name": name, "root_path": root_path, "algo": algo, "files_indexed": len(batch)}
 
 
 def verify_baseline(name: str, *, recursive: bool = True, limit: Optional[int] = 10000, algo: Optional[str] = None) -> Dict:
     base_row = db.get_integrity_baseline_by_name(name)
     if not base_row:
         return {"error": f"Baseline '{name}' no encontrada"}
-    root_path = Path(base_row["root_path"]).expanduser()
+    root_path = base_row["root_path"]
     algo_eff = (algo or base_row["algo"]).lower()
 
     indexed = {row["path"]: row for row in db.get_integrity_files(int(base_row["id"]))}
-    current_files = list(_walk_files(root_path, recursive=recursive, limit=limit))
+
+    current_files = scanner.scan_path_parallel(root_path)
+    if limit:
+        current_files = current_files[:limit]
+
 
     added: List[Dict] = []
     removed: List[Dict] = []
@@ -78,26 +44,19 @@ def verify_baseline(name: str, *, recursive: bool = True, limit: Optional[int] =
 
     seen_paths = set()
 
-    for f in current_files:
-        p = str(f.resolve())
-        seen_paths.add(p)
-        try:
-            st = f.stat()
-            h = _hash_file(f, algo_eff)
-        except Exception as e:
-            modified.append({"path": p, "error": str(e)})
-            continue
-        prev = indexed.get(p)
+    for path, hash_val, size, mtime in current_files:
+        seen_paths.add(path)
+        prev = indexed.get(path)
         if not prev:
-            added.append({"path": p, "hash": h, "size": int(st.st_size), "mtime": float(st.st_mtime)})
+            added.append({"path": path, "hash": hash_val, "size": size, "mtime": mtime})
         else:
-            if h != prev["hash"] or int(st.st_size) != int(prev.get("size") or 0):
+            if hash_val != prev["hash"] or size != int(prev.get("size") or 0):
                 modified.append({
-                    "path": p,
+                    "path": path,
                     "old_hash": prev["hash"],
-                    "new_hash": h,
+                    "new_hash": hash_val,
                     "old_size": int(prev.get("size") or 0),
-                    "new_size": int(st.st_size),
+                    "new_size": size,
                 })
 
     for p, prev in indexed.items():
