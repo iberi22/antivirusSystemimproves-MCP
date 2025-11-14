@@ -54,7 +54,7 @@ Construir un servidor MCP en Python para administración profunda y segura de Wi
 - Iteración 3: servicios (listar y estado), consulta básica de Event Log.
 - Iteración 4: acciones controladas de GameBooster (con consentimiento y reversibilidad).
 - Iteración 5: Telemetría avanzada (ETW/Sysmon), OTel opcional.
-- Empaquetado opcional (PyInstaller/MSI) para usuarios finales.
+- Iteración 6: Empaquetado con PyInstaller para distribución como ejecutable único. ✔
 
 ## Decisiones Clave
 - Híbrido Python/Rust para combinar facilidad de desarrollo con alto rendimiento.

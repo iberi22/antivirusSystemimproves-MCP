@@ -55,6 +55,7 @@ Se han añadido capacidades de escaneo de alto rendimiento con Rust y detección
 | TD-03 | Añadir logging a Windows Event Log               | BAJA      | ✅ Completado | Jules       |
 | TD-04 | Definir acciones seguras GameBooster (consent)   | ALTA      | ✅ Completado  | Jules       |
 | TD-05 | Optimizar módulo de integridad con Rust          | MEDIA     | ✅ Completado | Jules       |
+| F2-01 | Empaquetar la aplicación con PyInstaller         | ALTA      | ✅ Completado | Jules       |
 
 ---
 ## 📝 Tareas Descubiertas Durante el Desarrollo

@@ -292,6 +292,16 @@ mcp dev .\mcp_win_admin\server.py --with-editable .
   - `db_optimize()`
   - `db_purge_old(events_ttl_seconds=2592000, reputation_ttl_seconds=7776000, hash_ttl_seconds=15552000)`
 
+## Empaquetado
+
+Para compilar la aplicación en un único ejecutable, puedes usar el script de compilación:
+
+```powershell
+python scripts/build.py
+```
+
+El ejecutable resultante se encontrará en el directorio `dist`.
+
 - Ejecución de Perfiles:
   - `profiles_execute(profile_name="GameBooster", action_key="switch_power_plan", confirm=true)`
 
