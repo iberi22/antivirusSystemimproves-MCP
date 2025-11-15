@@ -48,7 +48,12 @@ def test_services_list_basic(monkeypatch):
     def fake_iter():
         for s in [Svc("a", "running"), Svc("b", "stopped")]:
             yield s
-    monkeypatch.setattr(services.psutil, "win_service_iter", lambda: fake_iter(), raising=True)
+
+    if hasattr(services.psutil, "win_service_iter"):
+        monkeypatch.setattr(services.psutil, "win_service_iter", lambda: fake_iter(), raising=True)
+    else:
+        monkeypatch.setattr(services.psutil, "win_service_iter", lambda: fake_iter(), raising=False)
+
     all_items = services.list_services()
     assert len(all_items) >= 2
     only_running = services.list_services(status="running", limit=1)

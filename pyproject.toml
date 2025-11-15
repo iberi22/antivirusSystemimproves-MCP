@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=68", "wheel", "setuptools-rust"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -32,6 +32,7 @@ dependencies = [
   "ruff>=0.5.0",
   "mypy>=1.8.0",
   "fastmcp>=2.0.0",
+  "pyinstaller>=6.0.0",
  ]
 
  yara = [
@@ -49,6 +50,10 @@ Issues = "https://github.com/your-org/mcp-windows-admin/issues"
 [tool.setuptools]
 packages = ["mcp_win_admin", "dashboard_api"]
 include-package-data = true
+
+[[tool.setuptools-rust.ext-modules]]
+target = "mcp_win_admin.native_scanner"
+path = "native/native_scanner/Cargo.toml"
 
 [tool.ruff]
 line-length = 100
